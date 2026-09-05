@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Trắc Nghiệm: Trí Tuệ Nhân Tạo Trong Khoa Học Và Đời Sống</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --bg: #0f172a;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --correct: #10b981;
+            --correct-bg: #ecfdf5;
+            --incorrect: #ef4444;
+            --incorrect-bg: #fef2f2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #0284c7, #4338ca);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .quiz-header p {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #38bdf8;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-body {
+            padding: 32px;
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .question-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+
+        .option-prefix {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #e2e8f0;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .option-btn:hover:not(:disabled) .option-prefix {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Option States */
+        .option-btn.selected-correct {
+            background: var(--correct-bg) !important;
+            border-color: var(--correct) !important;
+            color: #065f46;
+        }
+
+        .option-btn.selected-correct .option-prefix {
+            background: var(--correct) !important;
+            color: white;
+        }
+
+        .option-btn.selected-incorrect {
+            background: var(--incorrect-bg) !important;
+            border-color: var(--incorrect) !important;
+            color: #991b1b;
+        }
+
+        .option-btn.selected-incorrect .option-prefix {
+            background: var(--incorrect) !important;
+            color: white;
+        }
+
+        .explanation-box {
+            margin-top: 20px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            font-size: 15px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .explanation-box strong {
+            color: #0f172a;
+        }
+
+        .quiz-footer {
+            margin-top: 28px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .next-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .next-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .next-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Result View */
+        .result-view {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0284c7, #4338ca);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.3);
+        }
+
+        .score-number {
+            font-size: 42px;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1;
+        }
+
+        .score-total {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .result-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .result-msg {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .restart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .restart-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>Kiểm Tra Trắc Nghiệm AI - Bài 2</h1>
+        <p>Chủ đề: Trí Tuệ Nhân Tạo Trong Khoa Học Và Đời Sống</p>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- Active Question View -->
+    <div class="quiz-body" id="quiz-body">
+        <div class="question-meta">
+            <span id="question-count">Câu 1 / 10</span>
+            <span id="score-tracker">Điểm: 0</span>
+        </div>
+        <div class="question-text" id="question-text">Đang tải câu hỏi...</div>
+        
+        <div class="options-list" id="options-list"></div>
+
+        <div class="explanation-box" id="explanation-box"></div>
+
+        <div class="quiz-footer">
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>
+                Câu tiếp theo <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Final Result View -->
+    <div class="result-view" id="result-view">
+        <div class="score-circle">
+            <span class="score-number" id="final-score">0</span>
+            <span class="score-total">trên 10 câu</span>
+        </div>
+        <h2 class="result-title" id="result-title">Hoàn Thành Bài Thi!</h2>
+        <p class="result-msg" id="result-msg">Bạn đã trả lời xuất sắc toàn bộ câu hỏi.</p>
+        <button class="restart-btn" onclick="restartQuiz()">
+            <i class="fa-solid fa-rotate-right" style="margin-right: 8px;"></i>Làm Lại Bài Thi
+        </button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            question: "Điểm khác biệt cơ bản giữa Hệ chuyên gia truyền thống và Hệ chuyên gia hiện đại tích hợp Học máy (Machine Learning) là gì?",
+            options: [
+                "Hệ chuyên gia hiện đại không cần dữ liệu đầu vào.",
+                "Hệ chuyên gia hiện đại có khả năng tự học từ dữ liệu để hình thành các luật suy diễn mới.",
+                "Hệ chuyên gia truyền thống xử lý ngôn ngữ tự nhiên tốt hơn.",
+                "Hệ chuyên gia truyền thống có khả năng tự sửa lỗi cú pháp lập trình."
+            ],
+            correct: 1,
+            explanation: "Sách giáo khoa nêu rõ: Ban đầu hệ chuyên gia dựa trên các luật có sẵn do chuyên gia nạp vào, nhưng nhờ Học máy, hệ chuyên gia hiện đại đã có khả năng tự học từ dữ liệu để tự hình thành các luật và tri thức mới."
+        },
+        {
+            question: "Phần mềm IBM Watson for Oncology được ứng dụng trong lĩnh vực nào?",
+            options: [
+                "Tự động hóa sản xuất nông nghiệp.",
+                "Quản lý điều phối giao thông thông minh.",
+                "Hỗ trợ đưa ra chẩn đoán và hướng điều trị ung thư.",
+                "Phân tích chứng từ tài chính ngân hàng."
+            ],
+            correct: 2,
+            explanation: "IBM Watson for Oncology là ví dụ tiêu biểu trong lĩnh vực Y tế, hỗ trợ các bác sĩ đưa ra phác đồ chẩn đoán và nâng cao hiệu quả điều trị ung thư."
+        },
+        {
+            question: "Trong nông nghiệp thông minh, AI giúp người nông dân tối ưu hóa công việc nào sau đây?",
+            options: [
+                "Dự đoán mùa vụ, lập kế hoạch tưới tiêu và thu hoạch tối ưu.",
+                "Thay thế hoàn toàn con người trong tiêu thụ nông sản.",
+                "Tự động sáng tạo các giống cây trồng mới trong phòng thí nghiệm.",
+                "Loại bỏ hoàn toàn tác động của thời tiết đối với cây trồng."
+            ],
+            correct: 0,
+            explanation: "AI hỗ trợ theo dõi điều kiện thời tiết, đất đai, sức đề kháng vật nuôi/cây trồng để dự đoán mùa vụ và hợp lý hóa kế hoạch chăm sóc/thu hoạch."
+        },
+        {
+            question: "Khái niệm 'Generative AI' (AI tạo sinh) tập trung chủ yếu vào mục tiêu nào?",
+            options: [
+                "Xây dựng rô-bốt lắp ráp trong dây chuyền công nghiệp.",
+                "Xây dựng các thuật toán để tự động tạo ra nội dung mới như văn bản, hình ảnh, âm thanh.",
+                "Điều khiển trực tiếp các phương tiện giao thông tự lái.",
+                "Tăng cường độ mật khẩu cho các tài khoản cá nhân."
+            ],
+            correct: 1,
+            explanation: "Generative AI (AI tạo sinh) tập trung vào việc tạo nội dung mới (hình ảnh, âm thanh, văn bản...) một cách tự động, đại diện tiêu biểu là ChatGPT."
+        },
+        {
+            question: "ChatGPT là mô hình trí tuệ nhân tạo thuộc phân loại nào hiện nay?",
+            options: [
+                "Trí tuệ nhân tạo tổng quát (Strong AI).",
+                "Trí tuệ nhân tạo hẹp (Narrow AI / Weak AI).",
+                "Trí tuệ nhân tạo siêu việt (Super AI).",
+                "Trí tuệ nhân tạo sinh học."
+            ],
+            correct: 1,
+            explanation: "Theo SGK, mặc dù ChatGPT rất thông minh nhưng các thành tựu AI hiện nay (bao gồm cả ChatGPT) vẫn thuộc phạm vi Trí tuệ nhân tạo hẹp (Narrow AI)."
+        },
+        {
+            question: "Yếu tố nào giúp ChatGPT có khả năng trả lời linh hoạt, hiểu được ngữ cảnh phức tạp thay vì chỉ đưa ra câu trả lời cố định?",
+            options: [
+                "Được lập trình sẵn tất cả các kịch bản đáp án trên thế giới.",
+                "Được huấn luyện trên dung lượng dữ liệu văn bản siêu lớn và khả năng suy luận ngôn ngữ.",
+                "Khả năng kết nối trực tiếp với suy nghĩ của người dùng.",
+                "Tự động thay đổi phần cứng máy tính khi xử lý."
+            ],
+            correct: 1,
+            explanation: "ChatGPT được huấn luyện trên hàng vạn văn bản lớn và có khả năng suy luận ngôn ngữ tự nhiên, giúp nó phản hồi linh hoạt theo ngữ cảnh."
+        },
+        {
+            question: "Hiện tượng AI hoạt động như một 'Hộp đen' (Black box) gây ra lo ngại gì lớn nhất cho xã hội?",
+            options: [
+                "Tốn quá nhiều điện năng khi vận hành.",
+                "Thiếu tính minh bạch, khó giải trình nguồn gốc và cơ sở của các quyết định.",
+                "Dễ làm hỏng thiết bị phần cứng của người dùng.",
+                "Khiến máy tính bị giảm tốc độ kết nối Internet."
+            ],
+            correct: 1,
+            explanation: "Khái niệm 'Hộp đen' chỉ việc AI đưa ra kết quả nhưng con người không thể hiểu rõ quá trình suy luận bên trong, dẫn đến thiếu minh bạch và khó chịu trách nhiệm giải trình."
+        },
+        {
+            question: "Vì sao các chuyên gia quốc tế đề xuất CẤM giao toàn quyền quyết định cho AI trong một số lĩnh vực?",
+            options: [
+                "Vì AI xử lý quá chậm so với con người.",
+                "Vì giao cho AI sẽ làm tăng chi phí vận hành.",
+                "Vì nguy cơ rủi ro đạo đức, mất an toàn đến sinh mạng như điều khiển vũ khí sát thương tự động.",
+                "Vì AI không biết sử dụng ngôn ngữ tiếng Anh."
+            ],
+            correct: 2,
+            explanation: "SGK nhấn mạnh: Cần nghiêm cấm việc giao toàn quyền cho AI điều khiển vũ khí sát thương hoặc can thiệp kiểm soát ý thức con người vì rủi ro an toàn và đạo đức rất nghiêm trọng."
+        },
+        {
+            question: "Tác động tiêu cực trực tiếp của AI đối với thị trường lao động và việc làm là gì?",
+            options: [
+                "Làm tăng nhu cầu tuyển dụng lao động phổ thông.",
+                "Gây ra áp lực thất nghiệp do AI tự động hóa nhiều công việc truyền thống.",
+                "Bắt buộc mọi người phải ngừng sử dụng máy tính.",
+                "Xóa bỏ hoàn toàn ngành công nghệ thông tin."
+            ],
+            correct: 1,
+            explanation: "Khả năng tự động hóa cao của AI khiến nhiều ngành nghề truyền thống có nguy cơ cắt giảm nhân sự, gây áp lực thất nghiệp lớn."
+        },
+        {
+            question: "Mục tiêu dài hạn của Trí tuệ nhân tạo tổng quát (Strong AI) hướng tới điều gì?",
+            options: [
+                "Chỉ làm tốt duy nhất một công việc cụ thể như chơi cờ vua.",
+                "Đạt năng lực trí tuệ toàn diện như con người và có thể áp dụng tri thức sang nhiều lĩnh vực khác nhau.",
+                "Thay thế hoàn toàn internet toàn cầu.",
+                "Chỉ tập trung xử lý đồ họa máy tính 3D."
+            ],
+            correct: 1,
+            explanation: "AI tổng quát (Strong AI) là mục tiêu dài hạn hướng tới năng lực trí tuệ toàn diện như con người, có thể học hỏi và áp dụng tri thức linh hoạt vào mọi lĩnh vực."
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    const questionText = document.getElementById('question-text');
+    const optionsList = document.getElementById('options-list');
+    const questionCount = document.getElementById('question-count');
+    const scoreTracker = document.getElementById('score-tracker');
+    const progressBar = document.getElementById('progress-bar');
+    const nextBtn = document.getElementById('next-btn');
+    const explanationBox = document.getElementById('explanation-box');
+
+    function loadQuestion() {
+        answered = false;
+        nextBtn.disabled = true;
+        explanationBox.style.display = 'none';
+
+        const q = quizData[currentQuestion];
+        questionText.textContent = q.question;
+        questionCount.textContent = `Câu ${currentQuestion + 1} / ${quizData.length}`;
+        scoreTracker.textContent = `Điểm: ${score}`;
+        progressBar.style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+
+        optionsList.innerHTML = '';
+        const prefixes = ['A', 'B', 'C', 'D'];
+
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.onclick = () => selectOption(index);
+            
+            btn.innerHTML = `
+                <div class="option-prefix">${prefixes[index]}</div>
+                <div>${opt}</div>
+            `;
+            optionsList.appendChild(btn);
+        });
+    }
+
+    function selectOption(selectedIndex) {
+        if (answered) return;
+        answered = true;
+
+        const q = quizData[currentQuestion];
+        const buttons = optionsList.querySelectorAll('.option-btn');
+
+        buttons.forEach((btn) => btn.disabled = true);
+
+        if (selectedIndex === q.correct) {
+            buttons[selectedIndex].classList.add('selected-correct');
+            score += 1;
+            scoreTracker.textContent = `Điểm: ${score}`;
+        } else {
+            buttons[selectedIndex].classList.add('selected-incorrect');
+            buttons[q.correct].classList.add('selected-correct');
+        }
+
+        explanationBox.innerHTML = `<strong>Giải thích:</strong> ${q.explanation}`;
+        explanationBox.style.display = 'block';
+
+        nextBtn.disabled = false;
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-body').style.display = 'none';
+        const resultView = document.getElementById('result-view');
+        resultView.style.display = 'block';
+
+        document.getElementById('final-score').textContent = score;
+        progressBar.style.width = '100%';
+
+        const resultTitle = document.getElementById('result-title');
+        const resultMsg = document.getElementById('result-msg');
+
+        if (score >= 8) {
+            resultTitle.textContent = "Xuất Sắc! 🎉";
+            resultMsg.textContent = "Bạn nắm rất vững kiến thức về Trí tuệ nhân tạo trong Bài 2!";
+        } else if (score >= 5) {
+            resultTitle.textContent = "Khá Tốt! 👍";
+            resultMsg.textContent = "Bạn đã hiểu bài khá rõ, hãy ôn tập lại một số chi tiết về rủi ro đạo đức AI nhé.";
+        } else {
+            resultTitle.textContent = "Cần Ôn Tập Thêm! 📚";
+            resultMsg.textContent = "Bạn nên đọc lại nội dung sách giáo khoa Bài 2 để nắm rõ hơn kiến thức.";
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestion = 0;
+        score = 0;
+        document.getElementById('quiz-body').style.display = 'block';
+        document.getElementById('result-view').style.display = 'none';
+        loadQuestion();
+    }
+
+    // Initialize Quiz on load
+    loadQuestion();
+</script>
+
+</body>
+</html>
